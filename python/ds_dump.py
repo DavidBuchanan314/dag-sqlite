@@ -23,13 +23,13 @@ def ds_dump(cur: sqlite3.Cursor, obj_id: int) -> DsObj:
 				).fetchall()
 			]
 		case DsTypes.MAP.value:
-			return dict(
-				(k.decode(), ds_dump(cur, v)) for k, v in
+			return {
+				k.decode(): ds_dump(cur, v) for k, v in
 				cur.execute(
 					"SELECT ds_map_key, ds_map_val FROM ds_map WHERE ds_map_id=? ORDER BY length(ds_map_key), ds_map_key",
 					(intval,)
 				).fetchall()
-			)
+			}
 
 if __name__ == "__main__":
 	import os
