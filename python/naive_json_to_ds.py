@@ -3,6 +3,12 @@ from typing import Dict, Any
 
 from dag_sqlite import DsTypes, DsObj
 
+# we want to be able to store unsigned integers, in the range 0 - 2^64-1,
+# but sqlite natively supports the range -2^63 - 2^63-1
+# this is pretty gross in python, but it's free in C
+def cast_uint64_to_int64(n: int) -> int:
+	return n - (1<<64) if n >= (1<<63) else n
+
 # TODO: handle CIDs
 # Note: This impl is recursive (ew) and not streamed (ew!)
 def json_to_ds_obj(cur: sqlite3.Cursor, obj: DsObj) -> int:
@@ -26,7 +32,9 @@ def json_to_ds_obj(cur: sqlite3.Cursor, obj: DsObj) -> int:
 		case int():
 			cur.execute(
 				"INSERT INTO ds_obj(ds_obj_type, ds_obj_val_int) VALUES (?, ?)",
-				(DsTypes.INTEGER.value, obj)
+				(DsTypes.NEGATIVE_INTEGER.value, cast_uint64_to_int64(~obj))
+				if obj < 0 else
+				(DsTypes.INTEGER.value, cast_uint64_to_int64(obj))
 			)
 			return cur.lastrowid
 		case str():

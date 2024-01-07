@@ -3,18 +3,20 @@ from dag_sqlite import DsTypes, DsObj
 
 def ds_dump(cur: sqlite3.Cursor, obj_id: int) -> DsObj:
 	obj_type, intval, blobval = cur.execute("SELECT ds_obj_type, ds_obj_val_int, ds_obj_val_blob FROM ds_obj WHERE ds_obj_id=?", (obj_id,)).fetchone()
-	match obj_type:
-		case DsTypes.NULL.value:
+	match DsTypes(obj_type):
+		case DsTypes.NULL:
 			return None
-		case DsTypes.BOOLEAN.value:
+		case DsTypes.BOOLEAN:
 			return bool(intval)
-		case DsTypes.INTEGER.value:
-			return intval
-		case DsTypes.STRING.value:
+		case DsTypes.INTEGER:
+			return intval & 0xffff_ffff_ffff_ffff
+		case DsTypes.NEGATIVE_INTEGER:
+			return ~(intval & 0xffff_ffff_ffff_ffff)
+		case DsTypes.STRING:
 			return blobval.decode()
-		case DsTypes.BYTES.value:
+		case DsTypes.BYTES:
 			return blobval
-		case DsTypes.LIST.value:
+		case DsTypes.LIST:
 			return [
 				ds_dump(cur, i) for i, *_ in
 				cur.execute(
@@ -22,7 +24,7 @@ def ds_dump(cur: sqlite3.Cursor, obj_id: int) -> DsObj:
 					(intval,)
 				).fetchall()
 			]
-		case DsTypes.MAP.value:
+		case DsTypes.MAP:
 			return {
 				k.decode(): ds_dump(cur, v) for k, v in
 				cur.execute(
@@ -30,6 +32,8 @@ def ds_dump(cur: sqlite3.Cursor, obj_id: int) -> DsObj:
 					(intval,)
 				).fetchall()
 			}
+		case _:
+			raise ValueError("unrecognised type")
 
 if __name__ == "__main__":
 	import os

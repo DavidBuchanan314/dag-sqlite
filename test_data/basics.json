@@ -13,5 +13,7 @@
 	"string": "hello world",
 	"bool_true": true,
 	"bool_false": false,
-	"null": null
+	"null": null,
+	"2^64-1": 18446744073709551615,
+	"-2^64": -18446744073709551616
 }

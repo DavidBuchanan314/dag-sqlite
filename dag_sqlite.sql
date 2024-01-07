@@ -11,11 +11,14 @@ Each type has a numeric ID:
 0: null     (no associated value)
 1: boolean  (value stored as INTEGER)
 2: integer  (value stored as INTEGER)
-3: string   (value stored as UTF8 BLOB)
-4: bytes    (value stored as BLOB)
-5: list     (value stored as INTEGER (a foreign key reference) *or* NULL for zero-length lists)
-6: map      (value stored as INTEGER (likewise))
-7: link     (value stored as BLOB)
+3: negative integer (value stored as INTEGER)
+4: string   (value stored as UTF8 BLOB)
+5: bytes    (value stored as BLOB)
+6: list     (value stored as INTEGER (a foreign key reference) *or* NULL for zero-length lists)
+7: map      (value stored as INTEGER (likewise))
+8: link     (value stored as BLOB)
+
+TODO: document the weirdness that is CBOR integer ranges, and how we represent that in SQLite
 
 */
 
