@@ -4,7 +4,7 @@ Terminology:
 
 "Map" is a key/value mapping (as in IPLD). Specifically, it maps UTF8 string keys to Objects
 
-"Object" is a value with associated type.
+"Object" is a value with associated type. (NB: IPLD calls types "kinds")
 
 Each type has a numeric ID:
 
@@ -13,7 +13,7 @@ Each type has a numeric ID:
 2: integer  (value stored as INTEGER)
 3: string   (value stored as UTF8 BLOB)
 4: bytes    (value stored as BLOB)
-5: list     (value stored as INTEGER (a foreign key reference))
+5: list     (value stored as INTEGER (a foreign key reference) *or* NULL for zero-length lists)
 6: map      (value stored as INTEGER (likewise))
 7: link     (value stored as BLOB)
 
