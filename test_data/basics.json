@@ -1,0 +1,17 @@
+{
+	"nested_obj": {
+		"a": 1,
+		"b": 2,
+		"c": {
+			"three": 3
+		}
+	},
+	"empty_obj": {},
+	"empty_arr": [],
+	"simple_arr": [1, 2, 3],
+	"nested_arr": [[1, 2], [], [3, 4, [5, 6]]],
+	"string": "hello world",
+	"bool_true": true,
+	"bool_false": false,
+	"null": null
+}
