@@ -6,6 +6,8 @@ DAG-SQLite is (or, will be) an SQLite-based represention of the IPLD Data Model.
 
 For working with arbitrarily large objects in a memory-constrained environment, you inevitably need to buffer them to disk. SQLite is a convenient mechanism for doing so. In particular, I expect it will be convenient for enforcing DAG-CBOR's map key order canonicalization rules, using SQLite to do the heavy lifting for sorting.
 
+DAG-SQLite is not a wire format, but an internal or intermediate representation to be used by application code.
+
 The goal is not *performance*, but efficient use of constrained resources, without arbitrarily limiting the size or shape of processable data.
 
 I aim to write code that has O(1) memory consumption, but at the cost of O(n) disk space. This also implies using non-recursive algorithms (or at least, moving recursive state onto disk, rather than encoding it within the native call stack).
