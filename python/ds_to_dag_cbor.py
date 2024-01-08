@@ -97,6 +97,7 @@ def ds_to_dag_cbor_recursionless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: 
 	
 	cur.execute("INSERT OR REPLACE INTO ds_stack(ds_stack_idx, ds_stack_val) VALUES (0, ?)", (obj_id,))
 	stack_ptr = 0
+
 	while stack_ptr >= 0:
 		key_string, obj_type, intval, blobval = cur.execute("""
 			SELECT ds_stack_key, ds_obj_type, ds_obj_val_int, ds_obj_val_blob
@@ -104,6 +105,7 @@ def ds_to_dag_cbor_recursionless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: 
 			WHERE ds_stack_idx=?
 		""", (stack_ptr,)).fetchone()
 		stack_ptr -= 1
+
 		if key_string is not None: # special case for map keys
 			write_dag_cbor_varint(stream, CborMajorType.TEXT_STRING, len(key_string))
 			stream.write(key_string)
@@ -131,12 +133,12 @@ def ds_to_dag_cbor_recursionless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: 
 					UPDATE ds_stack
 					SET ds_stack_key=NULL, ds_stack_val=ds_arr_val
 					FROM (
-						SELECT ds_arr_val, ROW_NUMBER()
-							OVER (ORDER BY ds_arr_idx) AS ds_arr_sort_idx
-						FROM ds_arr WHERE ds_arr_id=?
+						SELECT ds_arr_val, ds_arr_idx
+						FROM ds_arr
+						WHERE ds_arr_id=?
 					)
-					WHERE ds_stack_idx=?-ds_arr_sort_idx
-				""", (intval, stack_ptr + arrlen + 1))
+					WHERE ds_stack_idx=?-ds_arr_idx
+				""", (intval, stack_ptr + arrlen))
 				stack_ptr += arrlen
 			case DsTypes.MAP:
 				maplen = cur.execute("SELECT COUNT(*) FROM ds_map WHERE ds_map_id=?", (intval,)).fetchone()[0]
