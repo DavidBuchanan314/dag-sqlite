@@ -90,7 +90,7 @@ def ds_to_dag_cbor(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: int) -> None:
 
 
 
-def ds_to_dag_cbor_stackless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: int) -> None:
+def ds_to_dag_cbor_recursionless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: int) -> None:
 	# temp hack to init the stack: (final version will grow ad hoc) (or maybe a preflight scan will already know?)
 	for i in range(100):
 		cur.execute("INSERT OR REPLACE INTO ds_stack(ds_stack_idx, ds_stack_val) VALUES (?, 0)", (i,))
@@ -142,6 +142,8 @@ def ds_to_dag_cbor_stackless(stream: BinaryIO, cur: sqlite3.Cursor, obj_id: int)
 				maplen = cur.execute("SELECT COUNT(*) FROM ds_map WHERE ds_map_id=?", (intval,)).fetchone()[0]
 				write_dag_cbor_varint(stream, CborMajorType.MAP, maplen)
 				# TODO: grow stack if needed
+				# XXX: this makes a copy of the map key. if it were long, it would be inefficient.
+				# in practice however, long map keys ought to be rare.
 				cur.execute("""
 					UPDATE ds_stack
 					SET ds_stack_key=ds_map_key, ds_stack_val=ds_map_val
@@ -175,7 +177,7 @@ if __name__ == "__main__":
 	
 	for root, *_ in cur.execute("SELECT ds_root_obj FROM ds_root"):
 		res = io.BytesIO()
-		ds_to_dag_cbor_stackless(res, cur, root)
+		ds_to_dag_cbor_recursionless(res, cur, root)
 		res = res.getvalue()
 		print(res)
 		print(json.dumps(dag_cbor.decode(res), indent="  "))
