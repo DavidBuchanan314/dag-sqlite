@@ -48,8 +48,6 @@ CREATE TABLE ds_map (
 	PRIMARY KEY (ds_map_id, ds_map_key)
 );
 
-/* TODO: add an index to assist with DAG-CBOR map key sort order? */
-
 
 /* extras */
 
@@ -57,17 +55,19 @@ CREATE TABLE ds_map (
 /* If I want to take that idea seriously, I should consider a version field somewhere. */
 CREATE TABLE ds_root (
 	ds_root_obj INTEGER NOT NULL
-)
+);
 
 
 /* temporary state */
 
 /*
+This one is for serializing DAG-CBOR,
+other structures may be required for other formats/operations,
+but I haven't thought that far ahead yet.
+ */
 
-TODO: figure this out.
-
-When parsing nested objects, we need to keep track of the parse state in a stack-like data structure.
-
-I'll cross that bridge when I come to it.
-
-*/
+CREATE TABLE ds_stack (
+	ds_stack_idx INTEGER PRIMARY KEY,
+	ds_stack_key BLOB, /* NULL for array items */
+	ds_stack_val INTEGER NOT NULL
+);
